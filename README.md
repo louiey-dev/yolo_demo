@@ -20,9 +20,9 @@
 - C#
 - Winform
 - Package
-    - YoloDotNet
-    - OpenCVSharp4
-    - Microsoft.ML.OnnxRuntime
-    - SixLabors.ImageShart
+    - YoloDotNet (2.0)
+    - OpenCVSharp4 (4.10.0.20240616)
+    - Microsoft.ML.OnnxRuntime (1.18.1)
+    - SixLabors.ImageShart (3.1.4)
 
 ![Yolo Demo](./yolo_demo.png)
