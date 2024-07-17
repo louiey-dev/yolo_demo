@@ -1,6 +1,4 @@
 
-
-
 using YoloDotNet.Enums;
 using YoloDotNet.Models;
 
@@ -56,7 +54,7 @@ namespace Yolo_Demo
             }
             else
             {
-                ERR($"Wrong model type selection\n");
+                ERR("Wrong model type selection\n");
                 return;
             }
 
@@ -146,6 +144,7 @@ namespace Yolo_Demo
 
             if (imgPath != null)
             {
+                //ObjectDetectionOnVideo(imgPath);
                 YoloVideoOpen(imgPath, mVer, mType);
             }
             else

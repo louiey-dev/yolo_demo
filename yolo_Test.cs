@@ -231,7 +231,7 @@ namespace Yolo_Demo
         }
 
         
-        public static readonly string OUTPUT_FOLDER = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "YoloDotNet_Results");
+        //public static readonly string OUTPUT_FOLDER = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "YoloDotNet_Results");
         public void YoloVideoOpen(String imgPath, ModelVersion modelVer, ModelType mediaType)
         {
             try
@@ -249,7 +249,7 @@ namespace Yolo_Demo
                 {
                     VideoFile = imgPath,
                     OutputDir = outDir,
-                    
+                    /*
                     GenerateVideo = false,
                     DrawLabels = false,
                     FPS = 30,
@@ -259,49 +259,109 @@ namespace Yolo_Demo
                     DrawConfidence = true,
                     KeepAudio = true,
                     KeepFrames = false,
-
+                    */
                     DrawSegment = DrawSegment.Default,
                     KeyPointOptions = CustomKeyPointColorMap.KeyPointOptions
                 };
 
 
-                using var yolov = new Yolo(new YoloOptions
+                using var yolo = new Yolo(new YoloOptions
                 {
                     OnnxModel = modelPath,
+                    //OnnxModel = @"..\..\..\assets\Models\yolov8s.onnx",
+                    //ModelType = ModelType.ObjectDetection,
                     ModelType = mediaType,
                     Cuda = false,                           // Use CPU or CUDA for GPU accelerated inference. Default = true
                     GpuId = 0,                               // Select Gpu by id. Default = 0
                     PrimeGpu = false,                       // Pre-allocate GPU before first. Default = false
                 });
 
-                int currentLineCursor = 0;
+                LOG("Video inference starting...\n");
 
                 // Listen to events...
-                yolov.VideoStatusEvent += (sender, e) =>
+                yolo.VideoStatusEvent += (sender, e) =>
                 {
-                    Console.Write((string)sender!);
-                    currentLineCursor = Console.CursorTop;
+                    Debug.Print($"StatusEvent {(string)sender!}");
                 };
 
-                yolov.VideoProgressEvent += (object? sender, EventArgs e) =>
+                yolo.VideoProgressEvent += (object? sender, EventArgs e) =>
                 {
-                    Console.SetCursorPosition(20, currentLineCursor);
-                    Console.Write(new string(' ', 4));
-                    Console.SetCursorPosition(20, currentLineCursor);
-                    Console.Write("{0}%", (int)sender!);
+                    //Debug.Print(new string(' ', 4));
+                    Debug.Print("VideoProgressEvent {0}%", (int)sender!);
+                    //LOG($"VideoProgressEvent {(int)sender!}% \r");
                 };
 
-                yolov.VideoCompleteEvent += (object? sender, EventArgs e) =>
+                yolo.VideoCompleteEvent += (object? sender, EventArgs e) =>
                 {
-                    Console.WriteLine();
-                    Console.WriteLine();
-                    Console.WriteLine("Complete!");
+                    LOG("Complete!\n");
                 };
 
-                Dictionary<int, List<ObjectDetection>> detections = yolov.RunObjectDetection(videoOptions, 0.25);
-                Console.WriteLine();
+                Dictionary<int, List<ObjectDetection>> detections = yolo.RunObjectDetection(videoOptions, 0.25);
             }
             catch (Exception ex) { ERR(ex.ToString()); }
         }
+
+#if true
+        static void ObjectDetectionOnVideo(String videoPath)
+        {
+            String outDir = Path.GetDirectoryName(videoPath);
+
+            var videoOptions = new VideoOptions
+            {
+                VideoFile = videoPath,
+                OutputDir = outDir, //DemoSettings.OUTPUT_FOLDER,
+                //GenerateVideo = false,
+                //DrawLabels = false,
+                //FPS = 30,
+                //Width = 640, // Resize video...
+                //Height = -2, // -2 = automatically calculate dimensions to keep proportions
+                //Quality = 28,
+                //DrawConfidence = true,
+                //KeepAudio = true,
+                //KeepFrames = false,
+                DrawSegment = DrawSegment.Default,
+                KeyPointOptions = CustomKeyPointColorMap.KeyPointOptions
+            };
+
+            Debug.Print("Running Object Detection on video...");
+
+            using var yolo = new Yolo(new YoloOptions
+            {
+                OnnxModel = @"..\..\..\assets\Models\yolov8s.onnx",
+                ModelType = ModelType.ObjectDetection,
+                Cuda = false,                           // Use CPU or CUDA for GPU accelerated inference. Default = true
+                GpuId = 0,                               // Select Gpu by id. Default = 0
+                PrimeGpu = false,                       // Pre-allocate GPU before first. Default = false
+            });
+
+            int currentLineCursor = 0;
+
+            // Listen to events...
+            yolo.VideoStatusEvent += (sender, e) =>
+            {
+                //Console.WriteLine();
+                Debug.Print((string)sender!);
+                //currentLineCursor = Console.CursorTop;
+            };
+
+            yolo.VideoProgressEvent += (object? sender, EventArgs e) =>
+            {
+                //Console.SetCursorPosition(20, currentLineCursor);
+                Debug.Print(new string(' ', 4));
+                //Console.SetCursorPosition(20, currentLineCursor);
+                Debug.Print("{0}%", (int)sender!);
+            };
+
+            yolo.VideoCompleteEvent += (object? sender, EventArgs e) =>
+            {
+                //Console.WriteLine();
+                //Console.WriteLine();
+                Debug.Print("Complete!");
+            };
+
+            Dictionary<int, List<ObjectDetection>> detections = yolo.RunObjectDetection(videoOptions, 0.25);
+            //Console.WriteLine();
+        }
+#endif    
     }
 }
