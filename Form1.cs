@@ -25,20 +25,20 @@ namespace Yolo_Demo
                 return;
             }
 
-            if(RBGet(rbYoloVersionV8))
+            if (RBGet(rbYoloVersionV8))
             {
                 mVer = ModelVersion.V8;
             }
             else
             {
-                mVer= ModelVersion.V10;
+                mVer = ModelVersion.V10;
             }
 
-            if(RBGet(rbYoloModelClassification))
+            if (RBGet(rbYoloModelClassification))
             {
                 mType = ModelType.Classification;
             }
-            else if(RBGet(rbYoloModelObjectDetection))
+            else if (RBGet(rbYoloModelObjectDetection))
             {
                 mType = ModelType.ObjectDetection;
             }
@@ -94,6 +94,69 @@ namespace Yolo_Demo
                 RBControl(rbYoloModelSegmentation, true);
                 RBControl(rbYoloModelPoseEstimation, true);
             }
+        }
+
+        private void btnVideoConvert_Click(object sender, EventArgs e)
+        {
+            String imgPath = ShowFileOpenDialog(FILE_FILTER_VIDEO);
+            ModelVersion mVer;
+            ModelType mType;
+
+            if (imgPath == "")
+            {
+                LOG("Please select video file\n");
+                return;
+            }
+
+            if (RBGet(rbYoloVersionV8))
+            {
+                mVer = ModelVersion.V8;
+            }
+            else
+            {
+                mVer = ModelVersion.V10;
+            }
+
+            if (RBGet(rbYoloModelClassification))
+            {
+                mType = ModelType.Classification;
+            }
+            else if (RBGet(rbYoloModelObjectDetection))
+            {
+                mType = ModelType.ObjectDetection;
+            }
+            else if (RBGet(rbYoloModelObbDetection))
+            {
+                mType = ModelType.ObbDetection;
+            }
+            else if (RBGet(rbYoloModelSegmentation))
+            {
+                mType = ModelType.Segmentation;
+            }
+            else if (RBGet(rbYoloModelPoseEstimation))
+            {
+                mType = ModelType.PoseEstimation;
+            }
+            else
+            {
+                ERR($"Wrong model type selection\n");
+                return;
+            }
+
+
+            if (imgPath != null)
+            {
+                YoloVideoOpen(imgPath, mVer, mType);
+            }
+            else
+            {
+                ERR("Video file open error\n");
+            }
+        }
+
+        private void btnLogClear_Click(object sender, EventArgs e)
+        {
+            LOG_Clear();
         }
     }
 }

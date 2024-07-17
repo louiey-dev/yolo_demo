@@ -34,6 +34,7 @@
             splitContainer3 = new SplitContainer();
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
+            btnVideoConvert = new Button();
             groupBox2 = new GroupBox();
             rbYoloModelObbDetection = new RadioButton();
             rbYoloModelPoseEstimation = new RadioButton();
@@ -49,6 +50,7 @@
             pbDst = new PictureBox();
             splitContainer2 = new SplitContainer();
             richTextBoxLog = new RichTextBox();
+            btnLogClear = new Button();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -131,6 +133,7 @@
             // 
             // tabPage1
             // 
+            tabPage1.Controls.Add(btnVideoConvert);
             tabPage1.Controls.Add(groupBox2);
             tabPage1.Controls.Add(btnYoloInit);
             tabPage1.Controls.Add(groupBox1);
@@ -141,6 +144,16 @@
             tabPage1.TabIndex = 0;
             tabPage1.Text = "Basic";
             tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // btnVideoConvert
+            // 
+            btnVideoConvert.Location = new Point(408, 78);
+            btnVideoConvert.Name = "btnVideoConvert";
+            btnVideoConvert.Size = new Size(116, 23);
+            btnVideoConvert.TabIndex = 2;
+            btnVideoConvert.Text = "Video Convert";
+            btnVideoConvert.UseVisualStyleBackColor = true;
+            btnVideoConvert.Click += btnVideoConvert_Click;
             // 
             // groupBox2
             // 
@@ -298,6 +311,7 @@
             // 
             // splitContainer2.Panel1
             // 
+            splitContainer2.Panel1.Controls.Add(btnLogClear);
             splitContainer2.Panel1.Controls.Add(richTextBoxLog);
             splitContainer2.Size = new Size(1057, 136);
             splitContainer2.SplitterDistance = 660;
@@ -311,6 +325,16 @@
             richTextBoxLog.Size = new Size(660, 136);
             richTextBoxLog.TabIndex = 0;
             richTextBoxLog.Text = "";
+            // 
+            // btnLogClear
+            // 
+            btnLogClear.Location = new Point(582, 110);
+            btnLogClear.Name = "btnLogClear";
+            btnLogClear.Size = new Size(75, 23);
+            btnLogClear.TabIndex = 1;
+            btnLogClear.Text = "Clear";
+            btnLogClear.UseVisualStyleBackColor = true;
+            btnLogClear.Click += btnLogClear_Click;
             // 
             // Form1
             // 
@@ -369,5 +393,7 @@
         private TabControl tabControl1;
         private TabPage tabPage1;
         private TabPage tabPage2;
+        private Button btnVideoConvert;
+        private Button btnLogClear;
     }
 }

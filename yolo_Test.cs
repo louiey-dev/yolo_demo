@@ -11,13 +11,15 @@ using YoloDotNet;
 using YoloDotNet.Extensions;
 using SkiaSharp;
 using OpenCvSharp;
+using Microsoft.ML.OnnxRuntime;
 
 namespace Yolo_Demo
 {
     public partial class Form1 : Form
     {
         const String FILE_FILTER_IMAGE = "그림 파일 (*.jpg, *.gif, *.bmp, *.png, *.svd, *.webp) | *.jpg; *.gif; *.bmp; *.png; *.svd; *.webp; | 모든 파일 (*.*) | *.*";
-        
+        const String FILE_FILTER_VIDEO = "비디오 파일 (*.mp4, *.avi, *.mpeg) | *.mp4; *.avi; *.mpeg; | 모든 파일 (*.*) | *.*";
+
         public void YoloOpen(String imgPath, ModelVersion modelVer, ModelType mediaType)
         {
             try
@@ -134,6 +136,57 @@ namespace Yolo_Demo
             }
         }
 
+        public String GetModelTypeOnnxPath(ModelVersion modelVer, ModelType mediaType)
+        {
+            try
+            {
+                String model = "";
+
+                // Initialize the YOLO model
+                if (modelVer == ModelVersion.V8)
+                {
+                    switch (mediaType)
+                    {
+                        case ModelType.Classification:
+                            model = @"..\..\..\assets\Models\yolov8s-cls.onnx";
+                            break;
+
+
+                        case ModelType.ObjectDetection:
+                            model = @"..\..\..\assets\Models\yolov8s.onnx";
+                            break;
+
+                        case ModelType.ObbDetection:
+                            model = @"..\..\..\assets\Models\yolov8s-obb.onnx";
+                            break;
+
+                        case ModelType.Segmentation:
+                            model = @"..\..\..\assets\Models\yolov8s-seg.onnx";
+                            break;
+
+                        case ModelType.PoseEstimation:
+                            model = @"..\..\..\assets\Models\yolov8s-pose.onnx";
+                            break;
+
+                        default:
+                            ERR($"Gave wrong media type...{mediaType}");
+                            break;
+                    }
+                }
+                else if (modelVer == ModelVersion.V10)
+                {
+                    model = @"..\..\..\assets\Models\yolov8s.onnx";
+                }
+
+                return model;
+            }
+            catch (Exception ex)
+            {
+                ERR(ex.ToString());
+                return "";
+            }
+        }
+
         public String ShowFileOpenDialog(String fileFilter)
         {
             try
@@ -175,6 +228,80 @@ namespace Yolo_Demo
                 ERR(e.ToString());
                 return "";
             }
+        }
+
+        
+        public static readonly string OUTPUT_FOLDER = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "YoloDotNet_Results");
+        public void YoloVideoOpen(String imgPath, ModelVersion modelVer, ModelType mediaType)
+        {
+            try
+            {
+                if( (imgPath == null) || (imgPath == "") )
+                {
+                    ERR("Please specify directory path and file name\n");
+                    return;
+                }
+
+                String outDir = Path.GetDirectoryName(imgPath);
+                String modelPath = GetModelTypeOnnxPath(modelVer, mediaType);
+
+                var videoOptions = new VideoOptions
+                {
+                    VideoFile = imgPath,
+                    OutputDir = outDir,
+                    
+                    GenerateVideo = false,
+                    DrawLabels = false,
+                    FPS = 30,
+                    Width = 640, // Resize video...
+                    Height = -2, // -2 = automatically calculate dimensions to keep proportions
+                    Quality = 28,
+                    DrawConfidence = true,
+                    KeepAudio = true,
+                    KeepFrames = false,
+
+                    DrawSegment = DrawSegment.Default,
+                    KeyPointOptions = CustomKeyPointColorMap.KeyPointOptions
+                };
+
+
+                using var yolov = new Yolo(new YoloOptions
+                {
+                    OnnxModel = modelPath,
+                    ModelType = mediaType,
+                    Cuda = false,                           // Use CPU or CUDA for GPU accelerated inference. Default = true
+                    GpuId = 0,                               // Select Gpu by id. Default = 0
+                    PrimeGpu = false,                       // Pre-allocate GPU before first. Default = false
+                });
+
+                int currentLineCursor = 0;
+
+                // Listen to events...
+                yolov.VideoStatusEvent += (sender, e) =>
+                {
+                    Console.Write((string)sender!);
+                    currentLineCursor = Console.CursorTop;
+                };
+
+                yolov.VideoProgressEvent += (object? sender, EventArgs e) =>
+                {
+                    Console.SetCursorPosition(20, currentLineCursor);
+                    Console.Write(new string(' ', 4));
+                    Console.SetCursorPosition(20, currentLineCursor);
+                    Console.Write("{0}%", (int)sender!);
+                };
+
+                yolov.VideoCompleteEvent += (object? sender, EventArgs e) =>
+                {
+                    Console.WriteLine();
+                    Console.WriteLine();
+                    Console.WriteLine("Complete!");
+                };
+
+                Dictionary<int, List<ObjectDetection>> detections = yolov.RunObjectDetection(videoOptions, 0.25);
+                Console.WriteLine();
+            }
+            catch (Exception ex) { ERR(ex.ToString()); }
         }
     }
 }
